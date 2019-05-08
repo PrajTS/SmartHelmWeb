@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Accident Report</title>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+	<style>
+      /* Set the size of the div element that contains the map */
+      #map {
+        height: 400px;  /* The height is 400 pixels */
+        width: 100%;  /* The width is the width of the web page */
+       }
+    </style>
+
+</head>
+<body>
+
+	<div class="container pt-3">
+		<div class="jumbotron bg-secondary text-light" style="min-height: 94vh;">
+			<h1 class="h2 text-center mb-5">Accident Report</h1>
+			<p class="h1 text-center">Name: <strong>John Smith</strong></p>
+			<hr class="bg-warning">
+			<div id="accident-status-list-container" class="my-4">
+				<div class="alert alert-success" role="alert">
+					<div class="row">
+						<div class="col-3 mr-3 text-right">
+							<p class="date text-muted mb-1"><strong>May 7, 2019</strong></p>
+							<p class="time text-muted">18:36:50</p>
+						</div>
+						<div class="col">
+				  			<h4 class="alert-heading">Doctor Reached</h4>
+							<p>This is some text describing the status of the accident at this time.</p>
+						</div>
+					</div>
+				</div>
+				<div class="alert alert-warning" role="alert">
+					<div class="row">
+						<div class="col-3 mr-3 text-right">
+							<p class="date text-muted mb-1"><strong>May 7, 2019</strong></p>
+							<p class="time text-muted">18:06:50</p>
+						</div>
+						<div class="col">
+				  			<h4 class="alert-heading">Doctor Enroute</h4>
+							<p>This is some text describing the status of the accident at this time.</p>
+						</div>
+					</div>
+				</div>
+				<div class="alert alert-danger" role="alert">
+					<div class="row">
+						<div class="col-3 mr-3 text-right">
+							<p class="date text-muted mb-1"><strong>May 7, 2019</strong></p>
+							<p class="time text-muted">17:36:50</p>
+						</div>
+						<div class="col">
+				  			<h4 class="alert-heading">Doctor Dispatched</h4>
+							<p>This is some text describing the status of the accident at this time.</p>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div id="map-container" class="mb-4">
+				<div id="map"></div>
+			</div>
+		</div>
+	</div>
+
+	
+    
+    <!--Load the API from the specified URL
+    * The async attribute allows the browser to render the page while the API loads
+    * The key parameter will contain your own API key (which is not needed for this tutorial)
+    * The callback parameter executes the initMap() function
+    -->
+    
+    <script>
+		// Initialize and add the map
+		function initMap() {
+		  // The location of Uluru
+		  var uluru = {lat: -25.344, lng: 131.036};
+		  // The map, centered at Uluru
+		  var map = new google.maps.Map(
+		      document.getElementById('map'), 
+		      {
+		      	zoom: 17, 
+		      	center: uluru
+		      });
+		  // The marker, positioned at Uluru
+		  var marker = new google.maps.Marker({position: uluru, map: map});
+		}
+    </script>
+    <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCQEqmVIPUKB8bMhhVGXagLq_kv5yN5IY4&callback=initMap">
+    </script>
+
+	<!-- <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+	<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script> -->
+</body>
+</html>
+<!-- 
+name
+map
+accident status list
+ -->
