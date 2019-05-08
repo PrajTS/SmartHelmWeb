@@ -14,57 +14,79 @@
 
 </head>
 <body>
+		<!-- The core Firebase JS SDK is always required and must be listed first -->
+	<script src="https://www.gstatic.com/firebasejs/6.0.1/firebase-app.js"></script>
+
+	<!-- TODO: Add SDKs for Firebase products that you want to use
+	     https://firebase.google.com/docs/web/setup#config-web-app -->
+	<script src="https://www.gstatic.com/firebasejs/6.0.1/firebase-database.js"></script>
 
 	<div class="container pt-3">
 		<div class="jumbotron bg-secondary text-light" style="min-height: 94vh;">
 			<h1 class="h2 text-center mb-5">Accident Report</h1>
-			<p class="h1 text-center">Name: <strong>John Smith</strong></p>
+			<p class="h1 text-center">Name: <strong id="name"></strong></p>
 			<hr class="bg-warning">
 			<div id="accident-status-list-container" class="my-4">
-				<div class="alert alert-success" role="alert">
-					<div class="row">
-						<div class="col-3 mr-3 text-right">
-							<p class="date text-muted mb-1"><strong>May 7, 2019</strong></p>
-							<p class="time text-muted">18:36:50</p>
-						</div>
-						<div class="col">
-				  			<h4 class="alert-heading">Doctor Reached</h4>
-							<p>This is some text describing the status of the accident at this time.</p>
-						</div>
-					</div>
-				</div>
-				<div class="alert alert-warning" role="alert">
-					<div class="row">
-						<div class="col-3 mr-3 text-right">
-							<p class="date text-muted mb-1"><strong>May 7, 2019</strong></p>
-							<p class="time text-muted">18:06:50</p>
-						</div>
-						<div class="col">
-				  			<h4 class="alert-heading">Doctor Enroute</h4>
-							<p>This is some text describing the status of the accident at this time.</p>
-						</div>
-					</div>
-				</div>
-				<div class="alert alert-danger" role="alert">
-					<div class="row">
-						<div class="col-3 mr-3 text-right">
-							<p class="date text-muted mb-1"><strong>May 7, 2019</strong></p>
-							<p class="time text-muted">17:36:50</p>
-						</div>
-						<div class="col">
-				  			<h4 class="alert-heading">Doctor Dispatched</h4>
-							<p>This is some text describing the status of the accident at this time.</p>
-						</div>
-					</div>
-				</div>
+				<!-- add individual accident statuses as list items here using jQuery -->
 			</div>
 			<div id="map-container" class="mb-4">
 				<div id="map"></div>
 			</div>
 		</div>
 	</div>
+	<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+	<script>
+	  // Your web app's Firebase configuration
+	  var firebaseConfig = {
+	    apiKey: "AIzaSyBMu_k16O1JrFE0M94st1qXeOXm5rXJjHE",
+	    authDomain: "helmetcontrol.firebaseapp.com",
+	    databaseURL: "https://helmetcontrol.firebaseio.com",
+	    projectId: "helmetcontrol",
+	    storageBucket: "helmetcontrol.appspot.com",
+	    messagingSenderId: "892854254220",
+	    appId: "1:892854254220:web:2e77db61caf5361c"
+	  };
+	  // Initialize Firebase
+	  firebase.initializeApp(firebaseConfig);
 
-	
+	  var database = firebase.database();
+	  var userId = {{userid}};
+
+	  var nameRef = firebase.database().ref('/Users/' + userId + '/Name');
+
+	  nameRef.once('value').then(function(snapshot){
+	  	$('#name').text(snapshot.val())
+	  })
+
+	  var reportListner = firebase.database().ref('/adetected/' + userId + '/report');
+	  reportListner.on('value', function(snapshot) {
+	  	var data = snapshot.val();
+
+	  	// first, empty the container
+	  	$('#accident-status-list-container').html("");
+	  	
+	  	// then add all elements
+	  	for(item in data) {
+	  		const itemObj = data[item];
+
+	  		let elem = $(`
+	  			<div class="alert alert-success" role="alert">
+						<div class="row">
+							<div class="col-3 mr-3 text-right">
+								<p class="date text-muted mb-1"><strong>${itemObj.date}</strong></p>
+								<p class="time text-muted">${itemObj.time}</p>
+							</div>
+							<div class="col">
+					  			<h4 class="alert-heading">${itemObj.value}</h4>
+								<p>${itemObj.remarks}</p>
+							</div>
+						</div>
+					</div>
+	  			`);
+	  		$('#accident-status-list-container').prepend(elem);
+	  	}
+	  });
+	</script>
     
     <!--Load the API from the specified URL
     * The async attribute allows the browser to render the page while the API loads
@@ -76,9 +98,33 @@
 		// Initialize and add the map
 		function initMap() {
 		  // The location of Uluru
-		  var uluru = {lat: -25.344, lng: 131.036};
+  		database.ref('/adetected/'+userId).once('value').then(function(snapshot){
+  			var data = snapshot.val();
+  			var lat = data.lat;
+  			var lng = data.lon;
+  			
+
+		  	var latArray = lat.split(" ");
+		  	var len = latArray[1].length;
+		  	var lat1 = parseInt(latArray[0],10) + parseFloat(latArray[1].substr(0,len-2),10)/60;
+
+		  	if(latArray[1].charAt(len-1)=='S'){
+		  			lat1 = (-1) * lat1;
+		  	}
+
+				var lngArray = lng.split(" ");
+		  	len = lngArray[1].length;
+		  	lng1 = parseInt(lngArray[0],10) + parseFloat(lngArray[1].substr(0,len-2),10)/60;
+		  	if(lngArray[1].charAt(len-1)=='W'){
+		  			lng1 = (-1) * lng1;
+		  	}
+
+		  	console.log(lat+"---"+lng);
+		  	console.log(parseInt(lngArray[0],10)+"---"+parseInt(lngArray[1].substr(0,len-2),10));
+		  	console.log(lat1+"---"+lng1);
+		  	var uluru = {lat: lat1, lng: lng1};
 		  // The map, centered at Uluru
-		  var map = new google.maps.Map(
+		  	var map = new google.maps.Map(
 		      document.getElementById('map'), 
 		      {
 		      	zoom: 17, 
@@ -86,15 +132,18 @@
 		      });
 		  // The marker, positioned at Uluru
 		  var marker = new google.maps.Marker({position: uluru, map: map});
+
+		  })	
+
+		  // console.log(lat1);
+		  // console.log(lng1);	
+		  
 		}
     </script>
     <script async defer
     src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCQEqmVIPUKB8bMhhVGXagLq_kv5yN5IY4&callback=initMap">
     </script>
 
-	<!-- <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-	<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script> -->
 </body>
 </html>
 <!-- 
