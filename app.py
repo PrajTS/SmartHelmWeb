@@ -3,6 +3,14 @@ from flask import render_template
 
 app = Flask(__name__)
 
+@app.route("/hospital/<string:hospitalid>")
+def viewAccidents(hospitalId):
+	return render_template('viewAccidents.html',hospitalid=hospitalid)
+
+@app.route("/hospital/<string:hospitalid>/<string:userid>")
+def viewUserAccidentInfo(hospitalid, userid):
+	return render_template(viewUserAccidentInfo.html, hospitalid = hospitalid, userid = userid)
+
 @app.route("/<string:userid>")
 def emC(userid):
 	return render_template('index.html',userid=userid)
