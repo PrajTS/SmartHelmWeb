@@ -50,7 +50,7 @@
 	  firebase.initializeApp(firebaseConfig);
 
 	  var database = firebase.database();
-	  var hospitalId = '{{hospitalid}}';
+	  var hospitalId = 'BGS';
 
 	  var nameRef = firebase.database().ref('/hospitals/' + hospitalId + '/Name');
 
@@ -67,12 +67,15 @@
 	  		var userRef = window.firebase.database();
 	  		var latHosp = snapshot.val()['lat'];
 	  		var lngHosp = snapshot.val()['lng'];
+	  		
 	  		for (let [key, value] of Object.entries(data)) {
 			     userRef.ref('/adetected/'+value).once('value').then(function(snapshot){
 			     	console.log(value);
 			     	if(snapshot.val()['status'] == true){
 			     		var latAcc = snapshot.val()['lat'];
-			     		var lngAcc = snapshot.val()['lng'];
+			     		var lngAcc = snapshot.val()['lon'];
+			     		console.log("Hosp: "+latHosp+"-----"+lngHosp);
+			     		console.log("Hosp: "+latAcc+"-----"+lngAcc);
 			     		var accRef = window.firebase.database().ref("/adetected/"+value+"/report/");
 			     		accRef.orderByKey().once('value').then(function(snapshot){
 			     			var itemOb = snapshot.val();
