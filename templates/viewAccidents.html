@@ -77,11 +77,10 @@
 			     			console.log(recent);
 			     			var itemObj = itemOb[recent];
 
-			     			var distUrl = "https://maps.googleapis.com/maps/api/distancematrix/json?origins=12.8998841%2C77.4935995&destinations=12.9664457%2C77.5238042&key=AIzaSyBN7G14eppA4YqlSr85ZCO1a7tawk9A7fo"
+			     			var distUrl = "https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/distancematrix/json?origins=12.8998841%2C77.4935995&destinations=12.9664457%2C77.5238042&key=AIzaSyBN7G14eppA4YqlSr85ZCO1a7tawk9A7fo"
 			     			$.ajax({
 			     				url: distUrl,
 			     				type: "GET",
-			     				dataType: 'jsonp',
 			     				success: (data, status, xhr) => {
 
 			     					var distance = data.rows.elements.distance.value;
