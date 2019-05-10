@@ -50,7 +50,7 @@
 	  firebase.initializeApp(firebaseConfig);
 
 	  var database = firebase.database();
-	  var hospitalId = "BGS";
+	  var hospitalId = {{hospitalid}};
 
 	  var nameRef = firebase.database().ref('/hospitals/' + hospitalId + '/Name');
 
@@ -82,9 +82,9 @@
 			     				url: distUrl,
 			     				type: "GET",
 			     				success: (data, status, xhr) => {
-
-			     					var distance = data.rows.elements.distance.value;
-			     					var duration = data.rows.elements.duration.value;
+			     					console.log(data);
+			     					var distance = data.rows[0].elements[0].distance.text;
+			     					var duration = data.rows[0].elements[0].duration.text;
 			     					var elem = $(`
 							  			<div class="alert alert-success" role="alert">
 												<div class="row">
@@ -100,15 +100,19 @@
 											  				</div>
 											  				<div class="col d-flex flex-column">
 											  					<div class="d-flex my-auto">
-											  						<div class="mr-3">
+											  						<div class="mr-3 d-flex">
+											  							<div class="my-auto">
 											  							<small>Distance</small>
 											  							<p id="dist">${distance}</p>
+											  							</div>
 											  						</div>
-											  						<div class="mr-3">
+											  						<div class="mr-3 d-flex">
+											  							<div class="my-auto">
 											  							<small>Duration</small>
 											  							<p id="duration">${duration}</p>
 											  						</div>
-											  						<div><a href="" class="btn btn-primary">Respond</a></div>
+											  						</div>
+											  						<div class="d-flex"><a href="" class="my-auto btn btn-primary">Respond</a></div>
 											  					</div>
 											  				</div>
 											  			</div>
