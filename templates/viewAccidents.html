@@ -65,19 +65,21 @@
 	  	if(snapshot.hasChild("accidents")){
 	  		var data = snapshot.val()['accidents'];
 	  		var userRef = window.firebase.database();
+	  		var latHosp = snapshot.val()['lat'];
+	  		var lngHosp = snapshot.val()['lng'];
 	  		for (let [key, value] of Object.entries(data)) {
 			     userRef.ref('/adetected/'+value).once('value').then(function(snapshot){
 			     	console.log(value);
 			     	if(snapshot.val()['status'] == true){
-
+			     		var latAcc = snapshot.val()['lat'];
+			     		var lngAcc = snapshot.val()['lng'];
 			     		var accRef = window.firebase.database().ref("/adetected/"+value+"/report/");
 			     		accRef.orderByKey().once('value').then(function(snapshot){
 			     			var itemOb = snapshot.val();
 			     			var recent = Object.keys(itemOb).length;
 			     			console.log(recent);
 			     			var itemObj = itemOb[recent];
-
-			     			var distUrl = "https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/distancematrix/json?origins=12.8998841%2C77.4935995&destinations=12.9664457%2C77.5238042&key=AIzaSyBN7G14eppA4YqlSr85ZCO1a7tawk9A7fo"
+			     			var distUrl = "https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/distancematrix/json?origins="+latHosp+"%2C"+lngHosp+"&destinations="+latAcc+"%2C"+lngAcc+"&key=AIzaSyBN7G14eppA4YqlSr85ZCO1a7tawk9A7fo";
 			     			$.ajax({
 			     				url: distUrl,
 			     				type: "GET",
