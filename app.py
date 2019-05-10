@@ -4,12 +4,12 @@ from flask import render_template
 app = Flask(__name__)
 
 @app.route("/hospital/<string:hospitalid>")
-def viewAccidents(hospitalId):
+def viewAccidents(hospitalid):
 	return render_template('viewAccidents.html',hospitalid=hospitalid)
 
-@app.route("/hospital/<string:hospitalid>/<string:userid>")
-def viewUserAccidentInfo(hospitalid, userid):
-	return render_template(viewUserAccidentInfo.html, hospitalid = hospitalid, userid = userid)
+# @app.route("/hospital/<string:hospitalid>/<string:userid>")
+# def viewUserAccidentInfo(hospitalid, userid):
+# 	return render_template(viewUserAccidentInfo.html, hospitalid = hospitalid, userid = userid)
 
 @app.route("/emc/<string:userid>")
 def emC(userid):
