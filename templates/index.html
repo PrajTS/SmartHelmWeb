@@ -100,28 +100,9 @@
 		  // The location of Uluru
   		database.ref('/adetected/'+userId).once('value').then(function(snapshot){
   			var data = snapshot.val();
-  			var lat = data.lat;
-  			var lng = data.lon;
+  			var lat1 = data.lat;
+  			var lng1 = data.lon;
   			
-
-		  	var latArray = lat.split(" ");
-		  	var len = latArray[1].length;
-		  	var lat1 = parseInt(latArray[0],10) + parseFloat(latArray[1].substr(0,len-2),10)/60;
-
-		  	if(latArray[1].charAt(len-1)=='S'){
-		  			lat1 = (-1) * lat1;
-		  	}
-
-				var lngArray = lng.split(" ");
-		  	len = lngArray[1].length;
-		  	lng1 = parseInt(lngArray[0],10) + parseFloat(lngArray[1].substr(0,len-2),10)/60;
-		  	if(lngArray[1].charAt(len-1)=='W'){
-		  			lng1 = (-1) * lng1;
-		  	}
-
-		  	console.log(lat+"---"+lng);
-		  	console.log(parseInt(lngArray[0],10)+"---"+parseInt(lngArray[1].substr(0,len-2),10));
-		  	console.log(lat1+"---"+lng1);
 		  	var uluru = {lat: lat1, lng: lng1};
 		  // The map, centered at Uluru
 		  	var map = new google.maps.Map(

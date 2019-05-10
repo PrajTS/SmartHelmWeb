@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Accident Report</title>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+	<style>
+      /* Set the size of the div element that contains the map */
+      #map {
+        height: 400px;  /* The height is 400 pixels */
+        width: 100%;  /* The width is the width of the web page */
+       }
+    </style>
+
+</head>
+<body>
+		<!-- The core Firebase JS SDK is always required and must be listed first -->
+	<script src="https://www.gstatic.com/firebasejs/6.0.1/firebase-app.js"></script>
+
+	<!-- TODO: Add SDKs for Firebase products that you want to use
+	     https://firebase.google.com/docs/web/setup#config-web-app -->
+	<script src="https://www.gstatic.com/firebasejs/6.0.1/firebase-database.js"></script>
+
+	<div class="container pt-3">
+		<div class="jumbotron bg-secondary text-light" style="min-height: 94vh;">
+			<h1 class="h2 text-center mb-5">Accident Report</h1>
+			<p class="h1 text-center">Hospital: <strong id="name"></strong></p>
+			<hr class="bg-warning">
+			<div id="accident-status-list-container" class="my-4">
+				<!-- add individual accident statuses as list items here using jQuery -->
+			</div>
+			<div id="map-container" class="mb-4">
+				<div id="map"></div>
+			</div>
+		</div>
+	</div>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+	<script>
+	  // Your web app's Firebase configuration
+	  var firebaseConfig = {
+	    apiKey: "AIzaSyBMu_k16O1JrFE0M94st1qXeOXm5rXJjHE",
+	    authDomain: "helmetcontrol.firebaseapp.com",
+	    databaseURL: "https://helmetcontrol.firebaseio.com",
+	    projectId: "helmetcontrol",
+	    storageBucket: "helmetcontrol.appspot.com",
+	    messagingSenderId: "892854254220",
+	    appId: "1:892854254220:web:2e77db61caf5361c"
+	  };
+	  // Initialize Firebase
+	  firebase.initializeApp(firebaseConfig);
+
+	  var database = firebase.database();
+	  var hospitalId = "BGS";
+
+	  var nameRef = firebase.database().ref('/hospitals/' + hospitalId + '/Name');
+
+	  nameRef.once('value').then(function(snapshot){
+	  	$('#name').text(snapshot.val())
+	  });
+
+	  var ref = firebase.database().ref('/hospitals/' + hospitalId);
+
+	  ref.on('value', function(snapshot) {
+	  	$('#accident-status-list-container').html("");
+	  	if(snapshot.hasChild("accidents")){
+	  		var data = snapshot.val()['accidents'];
+	  		var userRef = window.firebase.database();
+	  		for (let [key, value] of Object.entries(data)) {
+			     userRef.ref('/adetected/'+value).once('value').then(function(snapshot){
+			     	console.log(value);
+			     	if(snapshot.val()['status'] == true){
+
+			     		var accRef = window.firebase.database().ref("/adetected/"+value+"/report/");
+			     		accRef.orderByKey().once('value').then(function(snapshot){
+			     			var itemOb = snapshot.val();
+			     			var recent = Object.keys(itemOb).length;
+			     			console.log(recent);
+			     			var itemObj = itemOb[recent];
+
+			     			var distUrl = "https://maps.googleapis.com/maps/api/distancematrix/json?origins=12.8998841%2C77.4935995&destinations=12.9664457%2C77.5238042&key=AIzaSyBN7G14eppA4YqlSr85ZCO1a7tawk9A7fo"
+			     			$.ajax({
+			     				url: distUrl,
+			     				type: "GET",
+			     				headers: {
+			     					"Access-Control-Allow-Origin": "*"
+			     				},
+			     				success: (data, status, xhr) => {
+
+			     					var distance = data.rows.elements.distance.value;
+			     					var duration = data.rows.elements.duration.value;
+			     					var elem = $(`
+							  			<div class="alert alert-success" role="alert">
+												<div class="row">
+													<div class="col-3 mr-3 text-right">
+														<p class="date text-muted mb-1"><strong>${itemObj.date}</strong></p>
+														<p class="time text-muted">${itemObj.time}</p>
+													</div>
+													<div class="col">
+											  			<div class="row">
+											  				<div class="col">
+											  					<h4 class="alert-heading">${itemObj.value}</h4>
+																	<p>${itemObj.remarks}</p>
+											  				</div>
+											  				<div class="col d-flex flex-column">
+											  					<div class="d-flex my-auto">
+											  						<div class="mr-3">
+											  							<small>Distance</small>
+											  							<p id="dist">${distance}</p>
+											  						</div>
+											  						<div class="mr-3">
+											  							<small>Duration</small>
+											  							<p id="duration">${duration}</p>
+											  						</div>
+											  						<div><a href="" class="btn btn-primary">Respond</a></div>
+											  					</div>
+											  				</div>
+											  			</div>
+													</div>
+												</div>
+											</div>
+							  		`);
+							  		$('#accident-status-list-container').prepend(elem);
+			     				},
+			     				error: error => {
+			     					console.error(error);
+			     				}
+			     			});
+			     		});
+			     	}
+
+			     });
+			     	}
+			}
+	  	});
+	</script>
+
+</body>
+</html>
