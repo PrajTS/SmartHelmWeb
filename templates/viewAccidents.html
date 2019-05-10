@@ -81,9 +81,7 @@
 			     			$.ajax({
 			     				url: distUrl,
 			     				type: "GET",
-			     				headers: {
-			     					"Access-Control-Allow-Origin": "*"
-			     				},
+			     				crossDomain:true,
 			     				success: (data, status, xhr) => {
 
 			     					var distance = data.rows.elements.distance.value;
