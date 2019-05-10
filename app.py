@@ -11,7 +11,7 @@ def viewAccidents(hospitalId):
 def viewUserAccidentInfo(hospitalid, userid):
 	return render_template(viewUserAccidentInfo.html, hospitalid = hospitalid, userid = userid)
 
-@app.route("emc/<string:userid>")
+@app.route("/emc/<string:userid>")
 def emC(userid):
 	return render_template('index.html',userid=userid)
 
