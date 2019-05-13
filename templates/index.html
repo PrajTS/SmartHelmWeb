@@ -100,8 +100,8 @@
 		  // The location of Uluru
   		database.ref('/adetected/'+userId).once('value').then(function(snapshot){
   			var data = snapshot.val();
-  			var lat1 = data.lat;
-  			var lng1 = data.lon;
+  			var lat1 = parseFloat(data.lat);
+  			var lng1 = parseFloat(data.lon);
   			
 		  	var uluru = {lat: lat1, lng: lng1};
 		  // The map, centered at Uluru

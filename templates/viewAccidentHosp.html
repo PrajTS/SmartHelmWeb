@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+
+	<head>
+		<meta charset="UTF-8">
+		<title>Accident Report</title>
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+			integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+		<style>
+			/* Set the size of the div element that contains the map */
+			#map {
+				height: 400px;
+				/* The height is 400 pixels */
+				width: 100%;
+				/* The width is the width of the web page */
+			}
+		</style>
+	</head>
+
+	<body>
+		<!-- The core Firebase JS SDK is always required and must be listed first -->
+		<script src="https://www.gstatic.com/firebasejs/6.0.1/firebase-app.js"></script>
+
+		<!-- TODO: Add SDKs for Firebase products that you want to use
+	     https://firebase.google.com/docs/web/setup#config-web-app -->
+		<script src="https://www.gstatic.com/firebasejs/6.0.1/firebase-database.js"></script>
+
+		<div class="container pt-3">
+			<div class="jumbotron bg-secondary text-light" style="min-height: 94vh;">
+				<div class="text-center">
+					<h1 class="h2 mb-5">Accident Report</h1>
+					<p class="h1">Name: <strong id="name"></strong></p>
+					<div class="details mt-3">
+						<p class="h5">Age: <strong id="age"></strong> &nbsp;&nbsp; Gender: <strong id="gender"></strong></p>
+					</div>
+				</div>
+				<div class="text-center mt-3 mb-1" id="statusContainer">
+					<div>
+						<button id="dispatchAmbulanceButton" class="btn btn-lg btn-dark mr-2">Dispatch Ambulance</button>
+						<button id="updateLocationToggle" class="btn btn-lg btn-dark mr-2">Arrival at Location</button>
+						<button id="updateHospitalToggle" class="btn btn-lg btn-dark">Arrival at Hospital</button>
+					</div>
+					<div class="update-form-container mt-2">
+						<div id="updateLocationContainer">
+							<div class="form-group">
+								<label for="updateConditionLocationText">Update Condition at Location</label>
+								<textarea class="form-control mb-2" id="updateConditionLocationText" rows="5"
+									style="max-width: 500px; margin: 0 auto;"></textarea>
+								<button type="button" class="btn btn-lg btn-light" id="updateAtLocationButton">Update</button>
+								<button type="button" class="btn btn-lg btn-outline-light" id="noHospitalizationAtLocationButton">No Hospitalization</button>
+							</div>
+						</div>
+						<div id="updateHospitalContainer">
+							<div class="form-group">
+								<label for="updateConditionHospitalText">Update Condition at Hopital</label>
+								<textarea class="form-control mb-2" id="updateConditionHospitalText" rows="5"
+									style="max-width: 500px; margin: 0 auto;"></textarea>
+								<button type="button" class="btn btn-lg btn-light" id="updateAtHospitalButton">Update</button>
+								<button type="button" class="btn btn-lg btn-outline-light" id="noHospitalizationAtHospitalButton">No Hospitalization</button>
+								<button type="button" class="btn btn-lg btn-outline-light" id="AdmitButton">Admit</button>
+								<button type="button" class="btn btn-lg btn-outline-light" id="DischargeButton">Discharge</button>
+							</div>
+						</div>
+					</div>
+				</div>
+				<hr class="bg-warning">
+				<div id="accident-status-list-container" class="my-4">
+					<!-- add individual accident statuses as list items here using jQuery -->
+				</div>
+				<div id="map-container" class="mb-4">
+					<div id="map"></div>
+				</div>
+			</div>
+		</div>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+		<script>
+
+			document.getElementById("statusContainer").style.display = "none";
+
+			// Your web app's Firebase configuration
+			var firebaseConfig = {
+				apiKey: "AIzaSyBMu_k16O1JrFE0M94st1qXeOXm5rXJjHE",
+				authDomain: "helmetcontrol.firebaseapp.com",
+				databaseURL: "https://helmetcontrol.firebaseio.com",
+				projectId: "helmetcontrol",
+				storageBucket: "helmetcontrol.appspot.com",
+				messagingSenderId: "892854254220",
+				appId: "1:892854254220:web:2e77db61caf5361c"
+			};
+			// Initialize Firebase
+			firebase.initializeApp(firebaseConfig);
+
+			var database = firebase.database();
+			var userId = {{userId}};
+			var hospitalId = {{hospitalId}};
+
+			var hospitalName;
+			var Address;
+			var Ph;
+			var locationLink;
+			var website;
+
+			var defaultRemark;
+			var hospInfo = firebase.database().ref('/hospitals/'+hospitalId);
+			hospInfo.once("value")
+				.then(function(snapshot){
+					hospitalName = snapshot.val().Name;
+					Address = snapshot.val().Address;
+					Ph = snapshot.val().Ph;
+					locationLink = "<a href='https://www.google.com/maps/place/"+snapshot.val().lat+","+snapshot.val().lng+"'>Hospital Location</a>";
+					website = snapshot.val().website;
+					defaultRemark = "Phone : "+Ph+" | Website : "+website+"<br>"+locationLink+"<br>";
+				});
+
+			var status;
+			var checkRef = firebase.database().ref('/hospitals/'+hospitalId+"/accidents");
+			checkRef.on('value', function(snapshot) {
+				var flag = true;
+				snapshot.forEach(function(childSnapshot){
+					if(childSnapshot.val() == userId)
+						flag = false;
+				});
+
+				if(flag)
+					window.location = "https://google.com";
+			});
+
+			var nameRef = firebase.database().ref('/Users/' + userId);
+			nameRef.once('value').then(function (snapshot) {
+				$('#name').text(snapshot.child("Name").val());
+				$('#age').text(snapshot.child("Age").val());
+				$('#gender').text(snapshot.child("Gender").val());
+			});
+			
+			var statusRef = firebase.database().ref('/adetected/'+userId+"/reportStatus");
+			statusRef.on('value',function(snapshot){
+				status = snapshot.val();
+				console.log(status);
+				updateButtons(status);
+			});
+
+			function updateButtons(status){
+				var sts = status.split(",");
+				var i;
+				for(i=0;i<sts.length;i++){
+					if(sts[i] == "Accident Detected"){
+						viewState1();
+					}
+					else if(sts[i] == "Ambulance Dispatched"){
+						viewState2();
+					}
+					else if(sts[i] == "Arrived At Location") {
+						viewState3();
+					}
+					else if(sts[i] == "Arrived At Hospital") {
+						viewState4();
+					}
+					else if(sts[i] == "Admitted") {
+						viewState5();
+					}
+					else if(sts[i] == "No Hospitalisation" || sts[i] == "Discharged" || sts[i] == "Cancelled") {
+						viewState6();
+					}
+				}
+			}
+
+			function viewState1(){
+				$("#dispatchAmbulanceButton").show();
+				$("#updateLocationToggle").hide();
+				$("#updateHospitalToggle").show();
+
+				$("#updateLocationContainer").hide();
+				$("#updateHospitalContainer").hide();
+				
+				$("#statusContainer").show();
+			}
+
+			function viewState2(){
+				$("#dispatchAmbulanceButton").hide();
+				$("#updateLocationToggle").show();
+				$("#updateHospitalToggle").show();
+
+				$("#updateLocationContainer").hide();
+				$("#updateHospitalContainer").hide();
+				
+				$("#statusContainer").show();
+			}
+
+			function viewState3(){
+				$("#dispatchAmbulanceButton").hide();
+				$("#updateLocationToggle").attr("disabled", true);
+				$("#updateLocationToggle").show();
+				$("#updateHospitalToggle").show();
+				
+				$("#updateConditionLocationText").show();
+  			$("#updateAtLocationButton").show();
+				$("#noHospitalizationAtLocationButton").show();
+				$("#updateLocationContainer").show();
+				
+				$("#updateHospitalContainer").hide();
+				
+				$("#statusContainer").show();
+			}
+
+			function viewState4(){
+				$("#dispatchAmbulanceButton").hide();
+				$("#updateLocationToggle").hide();
+				$("#updateHospitalToggle").attr("disabled", true);
+				$("#updateHospitalToggle").show();
+				
+				$("#updateLocationContainer").hide();
+
+				$("#updateConditionHospitalText").show();
+			  $("#updateAtHospitalButton").show();
+			  $("#noHospitalizationAtHospitalButton").show();
+			  $("#AdmitButton").show();
+			  $("#DischargeButton").hide();
+				$("#updateHospitalContainer").show();
+				
+				$("#statusContainer").show();
+			}
+
+			function viewState5(){
+				$("#dispatchAmbulanceButton").hide();
+				$("#updateLocationToggle").hide();
+				$("#updateHospitalToggle").attr("disabled", true);
+				$("#updateHospitalToggle").show();
+				
+				$("#updateLocationContainer").hide();
+
+				$("#updateConditionHospitalText").show();
+			  $("#updateAtHospitalButton").show();
+			  $("#noHospitalizationAtHospitalButton").hide();
+			  $("#AdmitButton").hide();
+			  $("#DischargeButton").show();
+				$("#updateHospitalContainer").show();
+				
+				$("#statusContainer").show();
+			}
+
+			function viewState6(){
+				$("#statusContainer").hide();
+			}
+
+		  var reportCount;
+		  var currCount;
+		  var currStatus;
+			var reportListner = firebase.database().ref('/adetected/' + userId + '/report');
+			reportListner.on('value', function (snapshot) {
+				var data = snapshot.val();
+				reportCount = snapshot.numChildren();
+
+				// first, empty the container
+				$('#accident-status-list-container').html("");
+
+				// then add all elements
+				for (item in data) {
+					const itemObj = data[item];
+
+					let elem = $(`
+	  			<div class="alert alert-success" role="alert">
+						<div class="row">
+							<div class="col-3 mr-3 text-right">
+								<p class="date text-muted mb-1"><strong>${itemObj.date}</strong></p>
+								<p class="time text-muted">${itemObj.time}</p>
+							</div>
+							<div class="col">
+								<h4 class="alert-heading">${itemObj.value}</h4>
+								<p>${itemObj.remarks}</p>
+							</div>
+						</div>
+					</div>
+	  			`);
+					$('#accident-status-list-container').prepend(elem);
+				}	
+				var reportRef2 = firebase.database().ref('/adetected/'+userId+"/report");
+				reportRef2.once('value').then(function (datasnapshot){
+					console.log(datasnapshot.val());
+					var statusList = status.slice(",");
+				if(statusList.includes("Arrived At Location") || status.includes("Arrived At Hospital") || status.includes("Admitted")){
+					var reportCount =  datasnapshot.numChildren();
+					var startPhrase;
+					var textArea;
+					if(statusList.includes("Arrived At Location")){
+						currStatus = "Arrived At Location";
+						startPhrase = "Ambulance Reached";
+						textArea = "updateConditionLocationText";
+					}
+					else if(statusList.includes("Arrived At Hospital")){
+						currStatus = "Arrived At Hospital";
+						startPhrase = "Reached Hospital";
+						textArea = "updateConditionHospitalText";
+					}
+					else if(statusList.includes("Admitted")){
+						currStatus = "Admitted";
+						startPhrase = "Admitted";
+						textArea = "updateConditionHospitalText";
+					}
+
+					for(var i=reportCount; i>=1; i--){
+						console.log(i+"----"+datasnapshot.child(""+i).child("remarks").val());
+						if(snapshot.child(""+i).child("value").val().startsWith(startPhrase)){
+							if(!snapshot.child(""+i).child("remarks").val().endsWith("Awaiting information about the condition.")){
+								if(currStatus == "Arrived At Hospital"){
+									var num = defaultRemark.length;
+									$("#"+textArea).val(snapshot.child(""+i).child("remarks").val().substring(num));
+								}
+								else
+									$("#"+textArea).val(snapshot.child(""+i).child("remarks").val());
+							}
+							else
+								$("#"+textArea).val("");
+							currCount = i;
+							break;
+						}
+					}	
+				}
+				});			
+
+			});
+
+			$("#dispatchAmbulanceButton").click(function(){
+				if (confirm("Confirm to dispatch an ambulance?")) {
+					var upStatus;
+			  	if(status == "Accident Detected")
+			  		upStatus = "Ambulance Dispatched";
+			  	else if (status == "Medic Enroute" || status == "Medic Reached")
+			  		upStatus = upStatus+",Ambulance Dispatched";
+			  	else
+			  		upStatus = status;
+			  	let now = new Date();
+			  	var time1 = now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds();
+			  	var months = [ "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ];
+			  	var date1 = now.getDate() + " " + months[now.getMonth()] + ", "+now.getFullYear();
+			  	statusRef.set(upStatus);
+			  	reportListner.child(""+(reportCount+1)).set({
+			  		value: "Ambulance Dispatched | "+hospitalName,
+			  		remarks: "Phone : "+Ph+" | Website : "+website+"<br>"+locationLink,
+			  		date: date1,
+			  		time: time1
+			  	});
+			  	
+				}
+
+			});
+
+
+			$("#updateLocationToggle").click(function(){
+				if (confirm("Confirm if the ambulance has arrived at location")) {
+					var upStatus;
+					if(status == "Ambulance Dispatched")
+						upStatus = "Arrived At Location";
+					else if(status == "Ambulance Dispatched,Medic Enroute" || status == "Medic Enroute,Ambulance Dispatched")
+						upStatus = "Arrived At Location, Medic Enroute";
+					else if(status == "Ambulance Dispatched,Medic Reached" || status == "Medic Reached,Ambulance Dispatched")
+						upStatus = "Arrived At Location,Medic Reached";
+
+					let now = new Date();
+			  	var time1 = now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds();
+			  	var months = [ "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ];
+			  	var date1 = now.getDate() + " " + months[now.getMonth()] + ", "+now.getFullYear();
+
+					statusRef.set(upStatus);
+
+			  	reportListner.child(""+(reportCount+1)).set({
+			  		value: "Ambulance Reached Accident Site",
+			  		remarks: "Awaiting information about the condition.",
+			  		date: date1,
+			  		time: time1
+			  	});
+			  	
+				}
+			});
+
+			$("#updateHospitalToggle").click(function(){
+		  	if (confirm("Confirm if the patient arrived at hospital")) {
+		  		var upStatus;
+		  		var statusList = status.split(",");
+		  		if(statusList.includes("Arrived At Location") || statusList.includes("Accident Detected"))
+						upStatus = "Arrived At Hospital";
+					else
+						upStatus = status;
+
+					let now = new Date();
+			  	var time1 = now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds();
+			  	var months = [ "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ];
+			  	var date1 = now.getDate() + " " + months[now.getMonth()] + ", "+now.getFullYear();
+
+			  	statusRef.set(upStatus);
+			  	reportListner.child(""+(reportCount+1)).set({
+			  		value: "Reached Hospital | " + hospitalName,
+			  		remarks: "Phone : "+Ph+" | Website : "+website+"<br>"+locationLink + "<br>Awaiting information about the condition.",
+			  		date: date1,
+			  		time: time1
+			  	});
+			  }
+		  });
+
+			$("#noHospitalizationAtLocationButton").click(function(){
+				if (confirm("Confirm if no hospitalisation")) {
+			  	var upStatus;
+					if(status == "Arrived At Location" || status == "Arrived At Hospital")
+						upStatus = "No Hospitalisation";
+					let now = new Date();
+			  	var time1 = now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds();
+			  	var months = [ "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ];
+			  	var date1 = now.getDate() + " " + months[now.getMonth()] + ", "+now.getFullYear();
+					statusRef.set(upStatus);
+			  	reportListner.child(""+(reportCount+1)).set({
+			  		value: "No Hospitalisation Needed",
+			  		remarks: "Safe and sound.",
+			  		date: date1,
+			  		time: time1
+			  	});
+			  	firebase.database().ref("/adetected/"+userId+"/status").set(false);
+				}
+			});
+
+			$("#noHospitalizationAtHospitalButton").click(function(){
+				if (confirm("Confirm if no hospitalisation")) {
+			  	var upStatus;
+					if(status == "Arrived At Location" || status == "Arrived At Hospital")
+						upStatus = "No Hospitalisation";
+					let now = new Date();
+			  	var time1 = now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds();
+			  	var months = [ "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ];
+			  	var date1 = now.getDate() + " " + months[now.getMonth()] + ", "+now.getFullYear();
+
+			  	statusRef.set(upStatus);
+			  	reportListner.child(""+(reportCount+1)).set({
+			  		value: "No Hospitalisation Needed",
+			  		remarks: "Safe and sound.",
+			  		date: date1,
+			  		time: time1
+			  	});
+			  	firebase.database().ref("/adetected/"+userId+"/status").set(false);
+				}
+			});
+
+			$("#AdmitButton").click(function(){
+				if (confirm("Confirm to admit.")) {
+			  	var upStatus;
+					if(status == "Arrived At Hospital")
+						upStatus = "Admitted";
+					let now = new Date();
+			  	var time1 = now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds();
+			  	var months = [ "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ];
+			  	var date1 = now.getDate() + " " + months[now.getMonth()] + ", "+now.getFullYear();
+
+			  	statusRef.set(upStatus);
+			  	reportListner.child(""+(reportCount+1)).set({
+			  		value: "Admitted.",
+			  		remarks: "Awaiting information about the condition.",
+			  		date: date1,
+			  		time: time1
+			  	});
+				}
+			});
+
+			$("#DischargeButton").click(function(){
+				if (confirm("Confirm to discharge")) {
+			  	var upStatus;
+					if(status == "Admitted")
+						upStatus = "Discharged";
+					let now = new Date();
+			  	var time1 = now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds();
+			  	var months = [ "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ];
+			  	var date1 = now.getDate() + " " + months[now.getMonth()] + ", "+now.getFullYear();
+
+			  	statusRef.set(upStatus);
+			  	reportListner.child(""+(reportCount+1)).set({
+			  		value: "Discharged.",
+			  		remarks: "Take Care. :(",
+			  		date: date1,
+			  		time: time1
+			  	});
+
+			  	firebase.database().ref("/adetected/"+userId+"/status").set(false);
+				}
+			});
+		  
+
+		  // update status of location
+		  $("#updateAtLocationButton").click(function(){
+		    const locationTextAreaId = "#updateConditionLocationText";
+		    const locationStatusText = $(locationTextAreaId).val();
+		    firebase.database().ref("/adetected/"+userId+"/report/"+currCount+"/remarks").set(locationStatusText);
+		  });
+
+		  $("#updateAtHospitalButton").click(function(){
+		    const hospitalTextAreaId = "#updateConditionHospitalText";
+		    const hospitalStatusText = $(hospitalTextAreaId).val();
+		    if(currStatus == "Arrived At Hospital")
+		    	firebase.database().ref("/adetected/"+userId+"/report/"+currCount+"/remarks").set(defaultRemark+ hospitalStatusText);
+		    else{
+
+		    	firebase.database().ref("/adetected/"+userId+"/report/"+currCount+"/remarks").set(hospitalStatusText);
+		    }
+		  });
+
+		</script>
+
+		<!--Load the API from the specified URL
+    * The async attribute allows the browser to render the page while the API loads
+    * The key parameter will contain your own API key (which is not needed for this tutorial)
+    * The callback parameter executes the initMap() function
+    -->
+
+		<script>
+			// Initialize and add the map
+			function initMap() {
+				// The location of Uluru
+				database.ref('/adetected/' + userId).once('value').then(function (snapshot) {
+					var data = snapshot.val();
+					var lat1 = parseFloat(data.lat);
+					var lng1 = parseFloat(data.lon);
+					var uluru = {
+						lat: lat1,
+						lng: lng1
+					};
+					// The map, centered at Uluru
+					var map = new google.maps.Map(
+						document.getElementById('map'), {
+							zoom: 17,
+							center: uluru
+						});
+					// The marker, positioned at Uluru
+					var marker = new google.maps.Marker({
+						position: uluru,
+						map: map
+					});
+
+				})
+
+			}
+		</script>
+		<script async defer
+			src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCQEqmVIPUKB8bMhhVGXagLq_kv5yN5IY4&callback=initMap">
+		</script>
+
+	</body>
+
+</html>

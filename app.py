@@ -9,12 +9,13 @@ def viewAccidents(hospitalid):
 
 @app.route("/hospital/<string:hospitalid>/<string:userid>")
 def viewUserAccidentInfo(hospitalid, userid):
-	return render_template(viewUserAccidentInfo.html, hospitalid = hospitalid, userid = userid)
+	return render_template('viewAccidentHosp.html', {hospitalId = hospitalid, userId = userid})
 
 @app.route("/emc/<string:userid>")
 def emC(userid):
 	return render_template('index.html',userid=userid)
 
+return render_template('error.html');
 
 if __name__ == '__main__':
 	app.run(debug=True)

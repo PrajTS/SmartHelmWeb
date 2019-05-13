@@ -50,7 +50,7 @@
 	  firebase.initializeApp(firebaseConfig);
 
 	  var database = firebase.database();
-	  var hospitalId = 'BGS';
+	  var hospitalId = {{hospitalId}};
 
 	  var nameRef = firebase.database().ref('/hospitals/' + hospitalId + '/Name');
 
