@@ -15,7 +15,5 @@ def viewUserAccidentInfo(hospitalid, userid):
 def emC(userid):
 	return render_template('index.html',userid=userid)
 
-return render_template('error.html');
-
 if __name__ == '__main__':
 	app.run(debug=True)
