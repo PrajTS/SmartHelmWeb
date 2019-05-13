@@ -9,7 +9,7 @@ def viewAccidents(hospitalid):
 
 @app.route("/hospital/<string:hospitalid>/<string:userid>")
 def viewUserAccidentInfo(hospitalid, userid):
-	return render_template('viewAccidentHosp.html', {hospitalId = hospitalid, userId = userid})
+	return render_template('viewAccidentHosp.html', passval = {hospitalId : hospitalid, userId : userid})
 
 @app.route("/emc/<string:userid>")
 def emC(userid):
