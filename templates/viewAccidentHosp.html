@@ -139,6 +139,10 @@
 				updateButtons(status);
 			});
 
+			var hospRef = firebase.database().ref('/adetected/'+userId+"/hospital");
+
+			var accStatusRef = firebase.database().ref('/adetected/'+userId+"/status")
+
 			function updateButtons(status){
 				var sts = status.split(",");
 				var i;
@@ -339,7 +343,7 @@
 			  		date: date1,
 			  		time: time1
 			  	});
-			  	
+			  	hospRef.set(hospitalId);			  	
 				}
 
 			});
@@ -535,7 +539,7 @@
 			}
 		</script>
 		<script async defer
-			src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCQEqmVIPUKB8bMhhVGXagLq_kv5yN5IY4&callback=initMap">
+			src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBN7G14eppA4YqlSr85ZCO1a7tawk9A7fo&callback=initMap">
 		</script>
 
 	</body>
