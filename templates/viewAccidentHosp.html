@@ -111,7 +111,7 @@
 					hospitalName = snapshot.val().Name;
 					Address = snapshot.val().Address;
 					Ph = snapshot.val().Ph;
-					locationLink = "<a href='https://www.google.com/maps/place/"+snapshot.val().lat+","+snapshot.val().lng+"'>Hospital Location</a>";
+					locationLink = "<a href='"+snapshot.val().locationLink"'>Hospital Location</a>";
 					website = snapshot.val().website;
 					defaultRemark = "Phone : "+Ph+" | Website : "+website+"<br>"+locationLink+"<br>";
 				});
@@ -247,6 +247,10 @@
 				$("#statusContainer").hide();
 			}
 
+			let accStsRef = firebase.database().ref('/adetected/'+userId+'/status');
+			accStsRef.on('value',function(snapshot){
+				$("#statusContainer").hide();
+			});
 		  var reportCount;
 		  var currCount;
 		  var currStatus;
