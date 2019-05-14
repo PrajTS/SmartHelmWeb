@@ -16,9 +16,6 @@
 <body>
 		<!-- The core Firebase JS SDK is always required and must be listed first -->
 	<script src="https://www.gstatic.com/firebasejs/6.0.1/firebase-app.js"></script>
-
-	<!-- TODO: Add SDKs for Firebase products that you want to use
-	     https://firebase.google.com/docs/web/setup#config-web-app -->
 	<script src="https://www.gstatic.com/firebasejs/6.0.1/firebase-database.js"></script>
 
 	<div class="container pt-3">
@@ -26,12 +23,36 @@
 			<h1 class="h2 text-center mb-5">Accident Report</h1>
 			<p class="h1 text-center">Hospital: <strong id="name"></strong></p>
 			<hr class="bg-warning">
+			<div class="text-center">
+				<p class="h4 my-2">Accident Alerts</p>
+			</div>
+			<div class="text-center" id="noAlerts" >
+				<p class="h5">No Accident Alerts</p>
+			</div>
 			<div id="accident-status-list-container" class="my-4">
 				<!-- add individual accident statuses as list items here using jQuery -->
 			</div>
-			<div id="map-container" class="mb-4">
-				<div id="map"></div>
+			<hr class="bg-warning">
+			<div class="text-center">
+				<p class="h4 my-2 ">Responded Accidents - Present </p>
 			</div>
+			<div class="text-center" id="noResp">
+				<p class="h5">No Responded Accident - Present</p>
+			</div>
+			<div id="respond-accident-status-list-container" class="my-4">
+				<!-- add individual accident statuses as list items here using jQuery -->
+			</div>
+			<hr class="bg-warning">
+			<div class="text-center">
+				<p class="h4 my-2 ">Past Accidents</p>
+			</div>
+			<div class="text-center" id="noPast">
+				<p class="h5">No Past Accident</p>
+			</div>
+			<div id="past-accident-status-list-container" class="my-4">
+				<!-- add individual accident statuses as list items here using jQuery -->
+			</div>
+
 		</div>
 	</div>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
@@ -49,7 +70,13 @@
 	  // Initialize Firebase
 	  firebase.initializeApp(firebaseConfig);
 
+	  $("#noPast").hide();
+	  $("#noAlerts").hide();
+	  $("#noResp").hide();
+
+
 	  var database = firebase.database();
+	  // var hospitalId = 'BGS';
 	  var hospitalId = "{{hospitalid}}";
 
 	  var nameRef = firebase.database().ref('/hospitals/' + hospitalId + '/Name');
@@ -59,7 +86,6 @@
 	  });
 
 	  var ref = firebase.database().ref('/hospitals/' + hospitalId);
-
 	  ref.on('value', function(snapshot) {
 	  	$('#accident-status-list-container').html("");
 	  	if(snapshot.hasChild("accidents")){
@@ -68,10 +94,15 @@
 	  		var latHosp = snapshot.val()['lat'];
 	  		var lngHosp = snapshot.val()['lng'];
 	  		
+	  		var alrAccEmpty = true;
+
 	  		for (let [key, value] of Object.entries(data)) {
 			     userRef.ref('/adetected/'+value).once('value').then(function(snapshot){
 			     	console.log(value);
-			     	if(snapshot.val()['status'] == true){
+			     	if(!snapshot.child('hospital').exists())
+			     	if(snapshot.child('status').val() == true ){
+	     				alrAccEmpty = false;
+	     				$("#noAlerts").hide();
 			     		var latAcc = snapshot.val()['lat'];
 			     		var lngAcc = snapshot.val()['lon'];
 			     		console.log("Hosp: "+latHosp+"-----"+lngHosp);
@@ -135,9 +166,185 @@
 			     	}
 
 			     });
+			  }
+			  if(alrAccEmpty){
+						$("#noAlerts").show();
+				}
+			}
+
+		$('#past-accident-status-list-container').html("");
+	  	if(snapshot.hasChild("accidents")){
+	  		var data = snapshot.val()['accidents'];
+	  		var userRef = window.firebase.database();
+	  		var latHosp = snapshot.val()['lat'];
+	  		var lngHosp = snapshot.val()['lng'];
+	  		
+	  		var alrpAccEmpty = true;
+
+	  		for (let [key, value] of Object.entries(data)) {
+			     userRef.ref('/adetected/'+value).once('value').then(function(snapshot){
+			     	console.log(value);
+			     	if(snapshot.child('hospital').exists()){
+			     	if(snapshot.child('status').val() == true && snapshot.child('hospital').val() == hospitalId){
+			     		alrpAccEmpty = false;
+			     		$("#noResp").hide();
+
+			     		var latAcc = snapshot.val()['lat'];
+			     		var lngAcc = snapshot.val()['lon'];
+			     		console.log("Hosp: "+latHosp+"-----"+lngHosp);
+			     		console.log("Hosp: "+latAcc+"-----"+lngAcc);
+			     		var accRef = window.firebase.database().ref("/adetected/"+value+"/report/");
+			     		accRef.orderByKey().once('value').then(function(snapshot){
+			     			var itemOb = snapshot.val();
+			     			var recent = Object.keys(itemOb).length;
+			     			console.log(recent);
+			     			var itemObj = itemOb[recent];
+			     			var distUrl = "https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/distancematrix/json?origins="+latHosp+"%2C"+lngHosp+"&destinations="+latAcc+"%2C"+lngAcc+"&key=AIzaSyBN7G14eppA4YqlSr85ZCO1a7tawk9A7fo";
+			     			$.ajax({
+			     				url: distUrl,
+			     				type: "GET",
+			     				success: (data, status, xhr) => {
+			     					console.log(data);
+			     					var distance = data.rows[0].elements[0].distance.text;
+			     					var duration = data.rows[0].elements[0].duration.text;
+			     					var elem = $(`
+							  			<div class="alert alert-success" role="alert">
+												<div class="row">
+													<div class="col-3 mr-3 text-right">
+														<p class="date text-muted mb-1"><strong>${itemObj.date}</strong></p>
+														<p class="time text-muted">${itemObj.time}</p>
+													</div>
+													<div class="col">
+											  			<div class="row">
+											  				<div class="col">
+											  					<h4 class="alert-heading">${itemObj.value}</h4>
+																	<p>${itemObj.remarks}</p>
+											  				</div>
+											  				<div class="col d-flex flex-column">
+											  					<div class="d-flex my-auto">
+											  						<div class="mr-3 d-flex">
+											  							<div class="my-auto">
+											  							<small>Distance</small>
+											  							<p id="dist">${distance}</p>
+											  							</div>
+											  						</div>
+											  						<div class="mr-3 d-flex">
+											  							<div class="my-auto">
+											  							<small>Duration</small>
+											  							<p id="duration">${duration}</p>
+											  						</div>
+											  						</div>
+											  						<div class="d-flex"><a href="https://smart-helm-web.herokuapp.com/hospital/${hospitalId}/${value}" class="my-auto btn btn-primary">Respond</a></div>
+											  					</div>
+											  				</div>
+											  			</div>
+													</div>
+												</div>
+											</div>
+							  		`);
+							  		$('#respond-accident-status-list-container').prepend(elem);
+			     				},
+			     				error: error => {
+			     					console.error(error);
+			     				}
+			     			});
+			     		});
 			     	}
+						}
+			     });
+			  }
+			  if(alrpAccEmpty){
+						$("#noResp").show();
+				}
+			}
+
+		$('#past-accident-status-list-container').html("");
+	  	if(snapshot.hasChild("accidents")){
+	  		var data = snapshot.val()['accidents'];
+	  		var userRef = window.firebase.database();
+	  		var latHosp = snapshot.val()['lat'];
+	  		var lngHosp = snapshot.val()['lng'];
+	  		
+	  		var alrpAccEmpty = true;
+
+	  		for (let [key, value] of Object.entries(data)) {
+			     userRef.ref('/adetected/'+value).once('value').then(function(snapshot){
+			     	console.log(value);
+			     	if(snapshot.child('hospital').exists()){
+			     	if(snapshot.child('status').val() == false && snapshot.child('hospital').val() == hospitalId){
+			     		alrpAccEmpty = false;
+			     		$("#noPast").hide();
+
+			     		var latAcc = snapshot.val()['lat'];
+			     		var lngAcc = snapshot.val()['lon'];
+			     		console.log("Hosp: "+latHosp+"-----"+lngHosp);
+			     		console.log("Hosp: "+latAcc+"-----"+lngAcc);
+			     		var accRef = window.firebase.database().ref("/adetected/"+value+"/report/");
+			     		accRef.orderByKey().once('value').then(function(snapshot){
+			     			var itemOb = snapshot.val();
+			     			var recent = Object.keys(itemOb).length;
+			     			console.log(recent);
+			     			var itemObj = itemOb[recent];
+			     			var distUrl = "https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/distancematrix/json?origins="+latHosp+"%2C"+lngHosp+"&destinations="+latAcc+"%2C"+lngAcc+"&key=AIzaSyBN7G14eppA4YqlSr85ZCO1a7tawk9A7fo";
+			     			$.ajax({
+			     				url: distUrl,
+			     				type: "GET",
+			     				success: (data, status, xhr) => {
+			     					console.log(data);
+			     					var distance = data.rows[0].elements[0].distance.text;
+			     					var duration = data.rows[0].elements[0].duration.text;
+			     					var elem = $(`
+							  			<div class="alert alert-success" role="alert">
+												<div class="row">
+													<div class="col-3 mr-3 text-right">
+														<p class="date text-muted mb-1"><strong>${itemObj.date}</strong></p>
+														<p class="time text-muted">${itemObj.time}</p>
+													</div>
+													<div class="col">
+											  			<div class="row">
+											  				<div class="col">
+											  					<h4 class="alert-heading">${itemObj.value}</h4>
+																	<p>${itemObj.remarks}</p>
+											  				</div>
+											  				<div class="col d-flex flex-column">
+											  					<div class="d-flex my-auto">
+											  						<div class="mr-3 d-flex">
+											  							<div class="my-auto">
+											  							<small>Distance</small>
+											  							<p id="dist">${distance}</p>
+											  							</div>
+											  						</div>
+											  						<div class="mr-3 d-flex">
+											  							<div class="my-auto">
+											  							<small>Duration</small>
+											  							<p id="duration">${duration}</p>
+											  						</div>
+											  						</div>
+											  						<div class="d-flex"><a href="https://smart-helm-web.herokuapp.com/hospital/${hospitalId}/${value}" class="my-auto btn btn-primary">Respond</a></div>
+											  					</div>
+											  				</div>
+											  			</div>
+													</div>
+												</div>
+											</div>
+							  		`);
+							  		$('#past-accident-status-list-container').prepend(elem);
+			     				},
+			     				error: error => {
+			     					console.error(error);
+			     				}
+			     			});
+			     		});
+			     	}
+						}
+			     });
+			  }
+			  if(alrpAccEmpty){
+						$("#noPast").show();
+				}
 			}
 	  	});
+
 	</script>
 
 </body>
