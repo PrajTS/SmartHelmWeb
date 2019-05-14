@@ -91,8 +91,12 @@
 			firebase.initializeApp(firebaseConfig);
 
 			var database = firebase.database();
+			
 			var userId = "{{passval['userId']}}";
 			var hospitalId = "{{passval['hospitalId']}}";
+
+			// var userId = "7892530771";
+			// var hospitalId = "BGS";
 
 			var hospitalName;
 			var Address;
@@ -132,20 +136,17 @@
 				$('#gender').text(snapshot.child("Gender").val());
 			});
 			
-			var statusRef = firebase.database().ref('/adetected/'+userId+"/reportStatus");
+			var statusRef = firebase.database().ref('/adetected/'+userId+'/reportStatus');
 			statusRef.on('value',function(snapshot){
 				status = snapshot.val();
-				console.log(status);
+				console.log("stat:"+status);
 				updateButtons(status);
 			});
-
-			var hospRef = firebase.database().ref('/adetected/'+userId+"/hospital");
-
-			var accStatusRef = firebase.database().ref('/adetected/'+userId+"/status")
 
 			function updateButtons(status){
 				var sts = status.split(",");
 				var i;
+				console.log(sts);
 				for(i=0;i<sts.length;i++){
 					if(sts[i] == "Accident Detected"){
 						viewState1();
@@ -343,7 +344,7 @@
 			  		date: date1,
 			  		time: time1
 			  	});
-			  	hospRef.set(hospitalId);			  	
+			  	firebase.database().ref('/adetected/'+userId+'/status').set(userId);
 				}
 
 			});
@@ -397,7 +398,6 @@
 			  		date: date1,
 			  		time: time1
 			  	});
-			  	hospRef.set(hospitalId);
 			  }
 		  });
 
@@ -475,7 +475,7 @@
 			  	statusRef.set(upStatus);
 			  	reportListner.child(""+(reportCount+1)).set({
 			  		value: "Discharged.",
-			  		remarks: "Take Care. :(",
+			  		remarks: "Take Care. :)",
 			  		date: date1,
 			  		time: time1
 			  	});
