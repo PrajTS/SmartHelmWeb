@@ -249,7 +249,8 @@
 
 			let accStsRef = firebase.database().ref('/adetected/'+userId+'/status');
 			accStsRef.on('value',function(snapshot){
-				$("#statusContainer").hide();
+				if(snapshot.val() == false)
+					$("#statusContainer").hide();
 			});
 		  var reportCount;
 		  var currCount;
