@@ -452,9 +452,10 @@
 			$("#AdmitButton").click(function(){
 				if (confirm("Confirm to admit.")) {
 			  	var upStatus;
-					if(status == "Arrived At Hospital")
-						upStatus = "Admitted";
-					let now = new Date();
+			  	$("#updateHospitalToggle").text("Admit");
+				if(status == "Arrived At Hospital")
+					upStatus = "Admitted";
+				let now = new Date();
 			  	var time1 = now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds();
 			  	var months = [ "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ];
 			  	var date1 = now.getDate() + " " + months[now.getMonth()] + ", "+now.getFullYear();
