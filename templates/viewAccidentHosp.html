@@ -92,11 +92,11 @@
 
 			var database = firebase.database();
 			
-			var userId = "{{passval['userId']}}";
-			var hospitalId = "{{passval['hospitalId']}}";
+			// var userId = "{{passval['userId']}}";
+			// var hospitalId = "{{passval['hospitalId']}}";
 
-			// var userId = "7892530771";
-			// var hospitalId = "BGS";
+			var userId = "7892530771";
+			var hospitalId = "BGS";
 
 			var hospitalName;
 			var Address;
@@ -335,14 +335,14 @@
 			  	if(status == "Accident Detected")
 			  		upStatus = "Ambulance Dispatched";
 			  	else if (status == "Medic Enroute" || status == "Medic Reached")
-			  		upStatus = upStatus+",Ambulance Dispatched";
+			  		upStatus = status+",Ambulance Dispatched";
 			  	else
 			  		upStatus = status;
 			  	let now = new Date();
 			  	var time1 = now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds();
 			  	var months = [ "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ];
 			  	var date1 = now.getDate() + " " + months[now.getMonth()] + ", "+now.getFullYear();
-			  	statusRef.set(upStatus);
+			  	console.log(upStatus);
 			  	reportListner.child(""+(reportCount+1)).set({
 			  		value: "Ambulance Dispatched | "+hospitalName,
 			  		remarks: "Phone : "+Ph+" | Website : "+website+"<br>"+locationLink,
@@ -359,8 +359,8 @@
 			$("#updateLocationToggle").click(function(){
 				if (confirm("Confirm if the ambulance has arrived at location")) {
 					var upStatus;
-					if(status == "Ambulance Dispatched")
-						upStatus = "Arrived At Location";
+					
+
 					var statuses = status.split(",");
 					
 
@@ -375,10 +375,11 @@
 			  		date: date1,
 			  		time: time1
 			  	});
-
-			  	else if(statuses.includes("Ambulance Dispatched" && statuses.includes("Medic Enroute"))
+			  	if(status == "Ambulance Dispatched")
+						upStatus = "Arrived At Location";
+			  	else if(statuses.includes("Ambulance Dispatched") && statuses.includes("Medic Enroute"))
 						upStatus = "Arrived At Location, Medic Enroute";
-				else if(statuses.includes("Ambulance Dispatched" && statuses.includes("Medic Reached"))
+				else if(statuses.includes("Ambulance Dispatched") && statuses.includes("Medic Reached"))
 						upStatus = "Arrived At Location, Medic Enroute";
 				}
 				statusRef.set(upStatus);
