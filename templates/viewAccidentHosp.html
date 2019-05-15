@@ -369,9 +369,6 @@
 			  	var months = [ "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ];
 			  	var date1 = now.getDate() + " " + months[now.getMonth()] + ", "+now.getFullYear();
 
-
-				statusRef.set(upStatus);
-
 			  	reportListner.child(""+(reportCount+1)).set({
 			  		value: "Ambulance Reached Accident Site",
 			  		remarks: "Awaiting information about the condition.",
@@ -384,6 +381,8 @@
 				else if(statuses.includes("Ambulance Dispatched" && statuses.includes("Medic Reached"))
 						upStatus = "Arrived At Location, Medic Enroute";
 				}
+				statusRef.set(upStatus);
+
 			});
 
 			$("#updateHospitalToggle").click(function(){
