@@ -349,7 +349,8 @@
 			  		date: date1,
 			  		time: time1
 			  	});
-			  	firebase.database().ref('/adetected/'+userId+'/status').set(userId);
+			  	firebase.database().ref('/adetected/'+userId+'/hospital').set(userId);
+			  	statusRef.set(upStatus);
 				}
 
 			});
@@ -368,7 +369,8 @@
 			  	var months = [ "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ];
 			  	var date1 = now.getDate() + " " + months[now.getMonth()] + ", "+now.getFullYear();
 
-					statusRef.set(upStatus);
+
+				statusRef.set(upStatus);
 
 			  	reportListner.child(""+(reportCount+1)).set({
 			  		value: "Ambulance Reached Accident Site",
