@@ -92,11 +92,11 @@
 
 			var database = firebase.database();
 			
-			// var userId = "{{passval['userId']}}";
-			// var hospitalId = "{{passval['hospitalId']}}";
+			var userId = "{{passval['userId']}}";
+			var hospitalId = "{{passval['hospitalId']}}";
 
-			var userId = "7892530771";
-			var hospitalId = "BGS";
+			// var userId = "7892530771";
+			// var hospitalId = "BGS";
 
 			var hospitalName;
 			var Address;
@@ -282,7 +282,8 @@
 					</div>
 	  			`);
 					$('#accident-status-list-container').prepend(elem);
-				}	
+				}
+
 				var reportRef2 = firebase.database().ref('/adetected/'+userId+"/report");
 				reportRef2.once('value').then(function (datasnapshot){
 					console.log(datasnapshot.val());
@@ -332,25 +333,26 @@
 			$("#dispatchAmbulanceButton").click(function(){
 				if (confirm("Confirm to dispatch an ambulance?")) {
 					var upStatus;
-			  	if(status == "Accident Detected")
-			  		upStatus = "Ambulance Dispatched";
-			  	else if (status == "Medic Enroute" || status == "Medic Reached")
-			  		upStatus = status+",Ambulance Dispatched";
-			  	else
-			  		upStatus = status;
-			  	let now = new Date();
-			  	var time1 = now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds();
-			  	var months = [ "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ];
-			  	var date1 = now.getDate() + " " + months[now.getMonth()] + ", "+now.getFullYear();
-			  	console.log(upStatus);
-			  	reportListner.child(""+(reportCount+1)).set({
-			  		value: "Ambulance Dispatched | "+hospitalName,
-			  		remarks: "Phone : "+Ph+" | Website : "+website+"<br>"+locationLink,
-			  		date: date1,
-			  		time: time1
-			  	});
-			  	firebase.database().ref('/adetected/'+userId+'/hospital').set(userId);
-			  	statusRef.set(upStatus);
+					console.log("fdsf "+status);
+				  	if(status == "Accident Detected")
+				  		upStatus = "Ambulance Dispatched";
+				  	else if (status == "Medic Enroute" || status == "Medic Reached")
+				  		upStatus = status+",Ambulance Dispatched";
+				  	else
+				  		upStatus = status;
+				  	let now = new Date();
+				  	var time1 = now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds();
+				  	var months = [ "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ];
+				  	var date1 = now.getDate() + " " + months[now.getMonth()] + ", "+now.getFullYear();
+				  	console.log(upStatus);
+				  	reportListner.child(""+(reportCount+1)).set({
+				  		value: "Ambulance Dispatched | "+hospitalName,
+				  		remarks: "Phone : "+Ph+" | Website : "+website+"<br>"+locationLink,
+				  		date: date1,
+				  		time: time1
+				  	});
+				  	firebase.database().ref('/adetected/'+userId+'/hospital').set(userId);
+				  	statusRef.set(upStatus);
 				}
 
 			});
