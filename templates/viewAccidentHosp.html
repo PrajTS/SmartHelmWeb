@@ -360,10 +360,8 @@
 					var upStatus;
 					if(status == "Ambulance Dispatched")
 						upStatus = "Arrived At Location";
-					else if(status == "Ambulance Dispatched,Medic Enroute" || status == "Medic Enroute,Ambulance Dispatched")
-						upStatus = "Arrived At Location, Medic Enroute";
-					else if(status == "Ambulance Dispatched,Medic Reached" || status == "Medic Reached,Ambulance Dispatched")
-						upStatus = "Arrived At Location,Medic Reached";
+					var statuses = status.split(",");
+					
 
 					let now = new Date();
 			  	var time1 = now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds();
@@ -378,7 +376,11 @@
 			  		date: date1,
 			  		time: time1
 			  	});
-			  	
+
+			  	else if(statuses.includes("Ambulance Dispatched" && statuses.includes("Medic Enroute"))
+						upStatus = "Arrived At Location, Medic Enroute";
+				else if(statuses.includes("Ambulance Dispatched" && statuses.includes("Medic Reached"))
+						upStatus = "Arrived At Location, Medic Enroute";
 				}
 			});
 
