@@ -189,7 +189,9 @@
 			function viewState2(){
 				$("#dispatchAmbulanceButton").hide();
 				$("#updateLocationToggle").show();
+				$("#updateLocationToggle").attr("disabled", false);
 				$("#updateHospitalToggle").show();
+				$("#updateHospitalToggle").attr("disabled", false);
 
 				$("#updateLocationContainer").hide();
 				$("#updateHospitalContainer").hide();
@@ -390,6 +392,7 @@
 				// else if(statuses.includes("Ambulance Dispatched") && statuses.includes("Medic Reached"))
 				// 		upStatus = "Arrived At Location, Medic Enroute";
 				statusRef.set(upStatus);
+
 				}
 				
 
