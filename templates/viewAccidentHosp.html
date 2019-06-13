@@ -368,7 +368,6 @@
 				if (confirm("Confirm if the ambulance has arrived at location")) {
 					var upStatus;
 					
-
 					var statuses = status.split(",");
 					
 
@@ -383,14 +382,16 @@
 			  		date: date1,
 			  		time: time1
 			  	});
-			  	if(status == "Ambulance Dispatched")
-						upStatus = "Arrived At Location";
-			  	else if(statuses.includes("Ambulance Dispatched") && statuses.includes("Medic Enroute"))
-						upStatus = "Arrived At Location, Medic Enroute";
-				else if(statuses.includes("Ambulance Dispatched") && statuses.includes("Medic Reached"))
-						upStatus = "Arrived At Location, Medic Enroute";
-				}
+			  	upStatus = "Arrived At Location";
+			 //  	if(status == "Ambulance Dispatched")
+				// 		upStatus = "Arrived At Location";
+			 //  	else if(statuses.includes("Ambulance Dispatched") && statuses.includes("Medic Enroute"))
+				// 		upStatus = "Arrived At Location, Medic Enroute";
+				// else if(statuses.includes("Ambulance Dispatched") && statuses.includes("Medic Reached"))
+				// 		upStatus = "Arrived At Location, Medic Enroute";
 				statusRef.set(upStatus);
+				}
+				
 
 			});
 
