@@ -398,10 +398,10 @@
 		  	if (confirm("Confirm if the patient arrived at hospital")) {
 		  		var upStatus;
 		  		var statusList = status.split(",");
-		  		if(statusList.includes("Arrived At Location") || statusList.includes("Accident Detected"))
+		  		//if(statusList.includes("Arrived At Location") || statusList.includes("Accident Detected"))
 						upStatus = "Arrived At Hospital";
-					else
-						upStatus = status;
+					// else
+					// 	upStatus = "";
 
 					let now = new Date();
 			  	var time1 = now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds();
