@@ -126,7 +126,7 @@
 				});
 
 				if(flag)
-					window.location = "https://google.com";
+					window.location = "https://smart-helm-web.herokuapp.com/error";
 			});
 
 			var nameRef = firebase.database().ref('/Users/' + userId);
@@ -149,22 +149,28 @@
 				console.log(sts);
 				for(i=0;i<sts.length;i++){
 					if(sts[i] == "Accident Detected"){
+						console.log("VS1");
 						viewState1();
 					}
 					else if(sts[i] == "Ambulance Dispatched"){
 						viewState2();
+						console.log("VS2");
 					}
 					else if(sts[i] == "Arrived At Location") {
 						viewState3();
+						console.log("VS3");
 					}
 					else if(sts[i] == "Arrived At Hospital") {
 						viewState4();
+						console.log("VS4");
 					}
 					else if(sts[i] == "Admitted") {
 						viewState5();
+						console.log("VS5");
 					}
 					else if(sts[i] == "No Hospitalisation" || sts[i] == "Discharged" || sts[i] == "Cancelled") {
 						viewState6();
+						console.log("VS6");
 					}
 				}
 			}
@@ -247,7 +253,7 @@
 				$("#statusContainer").hide();
 			}
 
-			let accStsRef = firebase.database().ref('/adetected/'+userId+'/status');
+			let accStsRef = firebase.database().ref('/Users/'+userId+'/accident');
 			accStsRef.on('value',function(snapshot){
 				if(snapshot.val() == false)
 					$("#statusContainer").hide();
@@ -351,7 +357,7 @@
 				  		date: date1,
 				  		time: time1
 				  	});
-				  	firebase.database().ref('/adetected/'+userId+'/hospital').set(userId);
+				  	firebase.database().ref('/adetected/'+userId+'/hospital').set(hospitalId);
 				  	statusRef.set(upStatus);
 				}
 
@@ -409,6 +415,7 @@
 			  		date: date1,
 			  		time: time1
 			  	});
+			  	firebase.database().ref('/adetected/'+userId+'/hospital').set(hospitalId);
 			  }
 		  });
 
@@ -428,7 +435,7 @@
 			  		date: date1,
 			  		time: time1
 			  	});
-			  	firebase.database().ref("/adetected/"+userId+"/status").set(false);
+			  	firebase.database().ref("/Users/"+userId+"/accident").set(false);
 				}
 			});
 
@@ -449,7 +456,7 @@
 			  		date: date1,
 			  		time: time1
 			  	});
-			  	firebase.database().ref("/adetected/"+userId+"/status").set(false);
+			  	firebase.database().ref("/Users/"+userId+"/accident").set(false);
 				}
 			});
 
@@ -492,7 +499,7 @@
 			  		time: time1
 			  	});
 
-			  	firebase.database().ref("/adetected/"+userId+"/status").set(false);
+			  	firebase.database().ref("/Users/"+userId+"/accident").set(false);
 				}
 			});
 		  

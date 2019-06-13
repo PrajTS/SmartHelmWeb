@@ -3,6 +3,10 @@ from flask import render_template
 
 app = Flask(__name__)
 
+@app.route("/error")
+def error():
+	return render_template('pageNotFound.html')
+
 @app.route("/hospital/<string:hospitalid>")
 def viewAccidents(hospitalid):
 	return render_template('viewAccidents.html',hospitalid=hospitalid)

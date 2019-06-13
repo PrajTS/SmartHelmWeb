@@ -85,6 +85,11 @@
 	  	$('#name').text(snapshot.val())
 	  });
 
+	  var listen = firebase.database().ref('/Users');
+	  listen.on('value', function(sa){
+
+	  var listen = firebase.database().ref('/adetected');
+	  listen.on('value', function(s){
 	  var ref = firebase.database().ref('/hospitals/' + hospitalId);
 	  ref.on('value', function(snapshot) {
 	  	$('#accident-status-list-container').html("");
@@ -99,8 +104,10 @@
 	  		for (let [key, value] of Object.entries(data)) {
 			     userRef.ref('/adetected/'+value).once('value').then(function(snapshot){
 			     	console.log(value);
-			     	if(!snapshot.child('hospital').exists())
-			     	if(snapshot.child('status').val() == true ){
+			     	if(!snapshot.child('hospital').exists()){
+			     		userRef.ref('/Users/'+value).once('value').then(function(snap){
+			     			if(snap.child('accident').val() == true){
+			     	// if(snapshot.child('status').val() == true ){
 	     				alrAccEmpty = false;
 	     				$("#noAlerts").hide();
 			     		var latAcc = snapshot.val()['lat'];
@@ -164,6 +171,8 @@
 			     			});
 			     		});
 			     	}
+			     });
+			     	}
 
 			     });
 			  }
@@ -185,7 +194,9 @@
 			     userRef.ref('/adetected/'+value).once('value').then(function(snapshot){
 			     	console.log(value);
 			     	if(snapshot.child('hospital').exists()){
-			     	if(snapshot.child('status').val() == true && snapshot.child('hospital').val() == hospitalId){
+			     		userRef.ref('/Users/'+value).once('value').then(function(snap){
+			     			if(snap.child('accident').val() == true){
+			     	if(snapshot.child('hospital').val() == hospitalId){
 			     		alrpAccEmpty = false;
 			     		$("#noResp").hide();
 
@@ -250,6 +261,8 @@
 			     			});
 			     		});
 			     	}
+			     }
+			 });
 						}
 			     });
 			  }
@@ -271,7 +284,10 @@
 			     userRef.ref('/adetected/'+value).once('value').then(function(snapshot){
 			     	console.log(value);
 			     	if(snapshot.child('hospital').exists()){
-			     	if(snapshot.child('status').val() == false && snapshot.child('hospital').val() == hospitalId){
+			     		userRef.ref('/Users/'+value).once('value').then(function(snap){
+			     			if(snap.child('accident').val() == false){
+			     				console.log(snap.child('accident').val());
+			     	if(snapshot.child('hospital').val() == hospitalId){
 			     		alrpAccEmpty = false;
 			     		$("#noPast").hide();
 
@@ -336,6 +352,8 @@
 			     			});
 			     		});
 			     	}
+			     }
+			 });
 						}
 			     });
 			  }
@@ -344,6 +362,7 @@
 				}
 			}
 	  	});
+});});
 
 	</script>
 
